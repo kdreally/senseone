@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}History: {{ task.title }} — SenseOne{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Edit History</h2>
+    <p class="subtitle">{{ task.title }}</p>
+  </div>
+  <a href="{{ url_for('tasks.task_detail', task_id=task.id) }}" class="btn btn-sm btn-outline">← Back to Task</a>
+</div>
+
+{% if versions %}
+<div class="history-list">
+  {% for v in versions %}
+  <div class="history-entry">
+    <div class="history-meta">
+      <span class="version-badge">v{{ v.version_number }}</span>
+      <strong>{{ v.changed_by.username }}</strong>
+      <span class="history-date">{{ v.changed_at.strftime('%Y-%m-%d %H:%M UTC') }}</span>
+      <span class="status-badge status-{{ v.status }}">{{ v.status | replace('_', ' ') | title }}</span>
+    </div>
+    {% if v.change_note %}
+      <p class="change-note">&#128221; {{ v.change_note }}</p>
+    {% endif %}
+    <details class="history-details">
+      <summary>Show snapshot</summary>
+      <dl class="detail-list">
+        <dt>Title</dt><dd>{{ v.title }}</dd>
+        <dt>Priority</dt><dd>{{ v.priority | title }}</dd>
+        <dt>Assigned To</dt>
+        <dd>{{ v.assignee_snapshot.username if v.assignee_snapshot else '—' }}</dd>
+        <dt>Due Date</dt>
+        <dd>{{ v.due_date.strftime('%Y-%m-%d') if v.due_date else '—' }}</dd>
+        <dt>Description</dt>
+        <dd class="history-description">{{ v.description or '(empty)' }}</dd>
+      </dl>
+    </details>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <p>No version history yet.</p>
+  <p>History begins when the task status is set to <strong>Final Save</strong> or <strong>Published</strong>.</p>
+</div>
+{% endif %}
+{% endblock %}

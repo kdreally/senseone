@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Tasks — SenseOne{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>All Tasks</h2>
+  <a href="{{ url_for('tasks.create_task') }}" class="btn btn-primary">+ New Task</a>
+</div>
+
+<!-- Filters -->
+<form method="GET" class="filter-bar">
+  <select name="status" class="form-control-sm">
+    <option value="">All Statuses</option>
+    {% for val, label in TASK_STATUSES %}
+      <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="priority" class="form-control-sm">
+    <option value="">All Priorities</option>
+    {% for val, label in PRIORITY_CHOICES %}
+      <option value="{{ val }}" {% if priority_filter == val %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="assigned" class="form-control-sm">
+    <option value="">All Assignments</option>
+    <option value="me" {% if assigned_filter == "me" %}selected{% endif %}>Assigned to me</option>
+    <option value="created" {% if assigned_filter == "created" %}selected{% endif %}>Created by me</option>
+  </select>
+
+  <button type="submit" class="btn btn-sm">Filter</button>
+  <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-sm btn-outline">Reset</a>
+</form>
+
+{% if tasks %}
+<div class="task-table-wrap">
+  <table class="task-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th>Assigned To</th>
+        <th>Due Date</th>
+        <th>Updated</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr>
+        <td>{{ task.id }}</td>
+        <td>
+          <a href="{{ url_for('tasks.task_detail', task_id=task.id) }}">{{ task.title }}</a>
+          {% if task.status in VERSIONED_STATUSES %}
+            <span class="badge badge-versioned" title="Edit history is being tracked">&#128274;</span>
+          {% endif %}
+        </td>
+        <td><span class="status-badge status-{{ task.status }}">{{ task.status | replace('_', ' ') | title }}</span></td>
+        <td><span class="priority-{{ task.priority }}">{{ task.priority | title }}</span></td>
+        <td>{{ task.assignee.username if task.assignee else '—' }}</td>
+        <td>{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else '—' }}</td>
+        <td>{{ task.updated_at.strftime('%Y-%m-%d') if task.updated_at else '—' }}</td>
+        <td>
+          <a href="{{ url_for('tasks.edit_task', task_id=task.id) }}" class="btn btn-sm">Edit</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="empty-state">No tasks found. <a href="{{ url_for('tasks.create_task') }}">Create one?</a></p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }} — SenseOne{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>
+    <span class="user-avatar-lg">{{ profile_user.username[0] | upper }}</span>
+    {{ profile_user.username }}
+  </h2>
+  <span class="user-email">{{ profile_user.email }}</span>
+</div>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <div class="detail-card">
+      <h3>Assigned Tasks ({{ assigned | length }})</h3>
+      {% if assigned %}
+        <table class="task-table">
+          <thead><tr><th>Title</th><th>Status</th><th>Priority</th><th>Due</th></tr></thead>
+          <tbody>
+            {% for task in assigned %}
+            <tr>
+              <td><a href="{{ url_for('tasks.task_detail', task_id=task.id) }}">{{ task.title }}</a></td>
+              <td><span class="status-badge status-{{ task.status }}">{{ task.status | replace('_', ' ') | title }}</span></td>
+              <td><span class="priority-{{ task.priority }}">{{ task.priority | title }}</span></td>
+              <td>{{ task.due_date.strftime('%Y-%m-%d') if task.due_date else '—' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty-text">No assigned tasks.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <aside class="detail-sidebar">
+    <div class="detail-card">
+      <h3>Created Tasks ({{ created | length }})</h3>
+      {% if created %}
+        <ul class="simple-list">
+          {% for task in created %}
+            <li><a href="{{ url_for('tasks.task_detail', task_id=task.id) }}">{{ task.title }}</a>
+            <span class="status-badge status-{{ task.status }}">{{ task.status | replace('_', ' ') | title }}</span></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty-text">No tasks created.</p>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}
