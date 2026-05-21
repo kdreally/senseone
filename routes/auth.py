@@ -1,16 +1,8 @@
-from urllib.parse import urlparse, urljoin
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from models import db, User
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
-
-
-def _is_safe_redirect_url(target: str) -> bool:
-    """Return True only if *target* is a URL relative to the current host."""
-    ref = urlparse(request.host_url)
-    test = urlparse(urljoin(request.host_url, target))
-    return test.scheme in {"http", "https"} and ref.netloc == test.netloc
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
@@ -64,11 +56,8 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             login_user(user, remember=remember)
-            next_page = request.args.get("next")
-            if next_page and not _is_safe_redirect_url(next_page):
-                next_page = None
             flash(f"Welcome back, {user.username}!", "success")
-            return redirect(next_page or url_for("tasks.list_tasks"))
+            return redirect(url_for("tasks.list_tasks"))
         else:
             flash("Invalid username or password.", "danger")
 
