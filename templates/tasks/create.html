@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}New Task — SenseOne{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Create New Task</h2>
+  <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-sm btn-outline">← Back</a>
+</div>
+
+<div class="form-card">
+  <form method="POST" action="{{ url_for('tasks.create_task') }}">
+    <div class="form-group">
+      <label for="title">Title <span class="required">*</span></label>
+      <input type="text" id="title" name="title" class="form-control" required autofocus />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" class="form-control" rows="6"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="priority">Priority</label>
+        <select id="priority" name="priority" class="form-control">
+          {% for val, label in PRIORITY_CHOICES %}
+            <option value="{{ val }}" {% if val == "medium" %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="due_date">Due Date</label>
+        <input type="date" id="due_date" name="due_date" class="form-control" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="assigned_to_id">Assign To</label>
+      <select id="assigned_to_id" name="assigned_to_id" class="form-control">
+        <option value="">— Unassigned —</option>
+        {% for user in users %}
+          <option value="{{ user.id }}">{{ user.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Create Task</button>
+      <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

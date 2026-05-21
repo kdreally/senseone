@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Team — SenseOne{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h2>Team Members</h2>
+</div>
+
+<div class="user-grid">
+  {% for user in users %}
+  <div class="user-card">
+    <div class="user-avatar">{{ user.username[0] | upper }}</div>
+    <div class="user-info">
+      <a href="{{ url_for('users.user_profile', user_id=user.id) }}">{{ user.username }}</a>
+      <span class="user-email">{{ user.email }}</span>
+    </div>
+    <div class="user-stats">
+      <span>{{ user.tasks_assigned | length }} assigned</span>
+      <span>{{ user.tasks_created | length }} created</span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}{{ task.title }} — SenseOne{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>{{ task.title }}</h2>
+    <span class="status-badge status-{{ task.status }}">{{ task.status | replace('_', ' ') | title }}</span>
+    {% if task.status in VERSIONED_STATUSES %}
+      <span class="badge badge-versioned" title="Edit history is tracked">&#128274; Tracked</span>
+    {% else %}
+      <span class="badge badge-draft" title="No edit history yet — edits are free-form">&#9998; Draft mode</span>
+    {% endif %}
+  </div>
+  <div class="page-header-actions">
+    <a href="{{ url_for('tasks.edit_task', task_id=task.id) }}" class="btn btn-primary">Edit</a>
+    {% if task.versions %}
+      <a href="{{ url_for('tasks.task_history', task_id=task.id) }}" class="btn btn-outline">History ({{ task.versions | length }})</a>
+    {% endif %}
+    <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-sm btn-outline">← Tasks</a>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <div class="detail-card">
+      <h3>Description</h3>
+      {% if task.description %}
+        <p class="description-text">{{ task.description }}</p>
+      {% else %}
+        <p class="empty-text">No description provided.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <aside class="detail-sidebar">
+    <div class="detail-card">
+      <h3>Details</h3>
+      <dl class="detail-list">
+        <dt>Priority</dt>
+        <dd><span class="priority-{{ task.priority }}">{{ task.priority | title }}</span></dd>
+
+        <dt>Assigned To</dt>
+        <dd>
+          {% if task.assignee %}
+            <a href="{{ url_for('users.user_profile', user_id=task.assignee.id) }}">{{ task.assignee.username }}</a>
+          {% else %}
+            <span class="empty-text">Unassigned</span>
+          {% endif %}
+        </dd>
+
+        <dt>Created By</dt>
+        <dd><a href="{{ url_for('users.user_profile', user_id=task.creator.id) }}">{{ task.creator.username }}</a></dd>
+
+        <dt>Due Date</dt>
+        <dd>{{ task.due_date.strftime('%B %d, %Y') if task.due_date else '—' }}</dd>
+
+        <dt>Created</dt>
+        <dd>{{ task.created_at.strftime('%Y-%m-%d %H:%M') if task.created_at else '—' }}</dd>
+
+        <dt>Last Updated</dt>
+        <dd>{{ task.updated_at.strftime('%Y-%m-%d %H:%M') if task.updated_at else '—' }}</dd>
+      </dl>
+    </div>
+
+    {% if task.status in VERSIONED_STATUSES %}
+    <div class="detail-card versioning-notice">
+      <h3>&#128274; Version Tracking Active</h3>
+      <p>This task is in <strong>{{ task.status | replace('_', ' ') | title }}</strong> status.
+         Every edit from this point is recorded in the change history.</p>
+      <a href="{{ url_for('tasks.task_history', task_id=task.id) }}" class="btn btn-sm">View History</a>
+    </div>
+    {% else %}
+    <div class="detail-card draft-notice">
+      <h3>&#9998; Draft Mode</h3>
+      <p>Edits to this task are <strong>not tracked</strong> yet.
+         Change the status to <em>Final Save</em> or <em>Published</em> to start tracking edits.</p>
+    </div>
+    {% endif %}
+
+    {% if task.created_by_id == current_user.id %}
+    <div class="detail-card danger-zone">
+      <h3>Danger Zone</h3>
+      <form method="POST" action="{{ url_for('tasks.delete_task', task_id=task.id) }}"
+            onsubmit="return confirm('Delete this task permanently?');">
+        <button type="submit" class="btn btn-danger btn-block">Delete Task</button>
+      </form>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
