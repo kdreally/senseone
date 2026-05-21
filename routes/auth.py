@@ -57,6 +57,12 @@ def login():
         if user and user.check_password(password):
             login_user(user, remember=remember)
             next_page = request.args.get("next")
+            # Guard against open-redirect: only allow relative URLs (no scheme/netloc)
+            if next_page:
+                from urllib.parse import urlparse
+                parsed = urlparse(next_page)
+                if parsed.scheme or parsed.netloc:
+                    next_page = None
             flash(f"Welcome back, {user.username}!", "success")
             return redirect(next_page or url_for("tasks.list_tasks"))
         else:
